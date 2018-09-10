@@ -630,6 +630,21 @@ class API
     }
 
     /**
+     * price get the latest price of a symbol
+     *
+     * $price = $api->price( "ETHBTC" );
+     *
+     * @return array with error message or array with symbol price
+     * @throws \Exception
+     */
+    public function price(string $symbol)
+    {
+        $ticker = $this->httpRequest("v3/ticker/price", "GET", ["symbol" => $symbol]);
+
+        return $ticker['price'];
+    }
+
+    /**
      * bookPrices get all bid/asks prices
      *
      * $ticker = $api->bookPrices();
@@ -1481,7 +1496,31 @@ class API
             "asks" => $asks,
         ];
     }
-
+    
+    /**
+     * roundStep rounds quantity with stepSize
+     * @param $qty quantity
+     * @param $stepSize parameter from exchangeInfo
+     * @return rounded value. example: roundStep(1.2345, 0.1) = 1.2
+     *
+     */
+    public function roundStep($qty, $stepSize = 0.1) {
+        $precision = strlen(substr(strrchr(rtrim($stepSize,'0'), '.'), 1));
+        return round((($qty / $stepSize) | 0) * $stepSize, $precision);
+    }
+    
+    /**
+     * roundTicks rounds price with tickSize
+     * @param $value price
+     * @param $tickSize parameter from exchangeInfo
+     * @return rounded value. example: roundStep(1.2345, 0.1) = 1.2
+     *
+     */
+    public function roundTicks($price, $tickSize) {
+        $precision = strlen(rtrim(substr($tickSize,strpos($tickSize, '.', 1) + 1), '0'));
+        return number_format($price, $precision, '.', '');
+    }
+    
     /**
      * getTransfered gets the total transfered in b,Kb,Mb,Gb
      *
